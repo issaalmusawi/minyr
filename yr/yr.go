@@ -2,6 +2,8 @@ package yr
 
 import (
 	"bufio"
+	//"encoding/csv"
+	//"errors"
 	"fmt"
 	"log"
 	"math"
@@ -9,11 +11,13 @@ import (
 	"strconv"
 	"strings"
 
+	//"time"
+	//"io"
 	//"go/scanner"
 	conv "github.com/issaalmusawi/funtest/konv"
 )
 
-func convertFile() error {
+func ConvertFile() error {
 
 	scanner := bufio.NewScanner(os.Stdin)
 
@@ -30,49 +34,27 @@ func convertFile() error {
 			return nil
 		}
 	}
-	/*
-		fmt.Print("Do you want to convert temperatures to Fahrenheit? (y/n): ")
-		scanner.Scan()
-		answer := scanner.Text()
-		var convertToFahrenheit bool
-		if answer == "y" {
-			convertToFahrenheit = true
-		} else {
-			convertToFahrenheit = false
-		}
 
-		fmt.Print("Do you want to calculate average temperature? (y/n): ")
-		scanner.Scan()
-		answer = scanner.Text()
-		var calculateAverage bool
-		if answer == "y" {
-			calculateAverage = true
-		} else {
-			calculateAverage = false
-		}*/
-
-	// Open input file
+	// inputfile og lage outputfil
 	inputFile, err := os.Open("kjevik-temp-celsius-20220318-20230318.csv")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer inputFile.Close()
 
-	// Create output file
 	outputFile, err := os.Create("2kjevik-temp-fahr-20220318-20230318.csv")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer outputFile.Close()
 
-	// Create a new buffered writer for output file
+	// buffere for input,output, samt writer,Reader
 	writer := bufio.NewWriter(outputFile)
 	defer writer.Flush()
 
-	// Create a new buffered reader for input file
 	reader := bufio.NewReader(inputFile)
 
-	// Read and write the first line
+	// uendret første linje, read/write
 	firstLine, err := reader.ReadString('\n')
 	if err != nil {
 		log.Fatal(err)
@@ -82,7 +64,7 @@ func convertFile() error {
 		log.Fatal(err)
 	}
 
-	// Read input file line by line
+	// Lese inputfil linje for linje
 	for {
 		line, err := reader.ReadString('\n')
 		if err != nil {
@@ -98,31 +80,103 @@ func convertFile() error {
 		// Split line by semicolon separator
 		parts := strings.Split(line, ";")
 
-		// Convert last data from Celsius to Fahrenheit
+		// conv siste data på linje
 		temperatureC, err := strconv.ParseFloat(parts[len(parts)-1], 64)
 		if err != nil {
-			continue // skip over non-float lines
+			continue // skip over non-float linje
 		}
 		temperatureF := conv.CelsiusToFahrenheit(temperatureC)
 
-		// Update last data in parts slice
+		// oppdatere siste data på linje før det skrives til ny fil
 		parts[len(parts)-1] = fmt.Sprintln(math.Round(temperatureF*100) / 100)
 
-		// Join parts slice back into a single string
+		// samle parts slice tilbake til en string seperaret med filformatet
 		newLine := strings.Join(parts, ";")
 
-		// Write new line to output file
+		// Skrive ny linje til fil
 		_, err = writer.WriteString(newLine)
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
 
-	// Write the new last line to the output file
+	// lage egen linje som skal skrives som siste linje i outputfil
 	lastLine := "Data er basert på gyldig data (per 18.03.2023) (CC BY 4.0) fra Meteorologisk institutt (MET);endringen er gjort av Issa Al-musawi \n"
 	_, err = writer.WriteString(lastLine)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Calculate average temperature in Celsius or Fahrenheit
+	fmt.Println("Which average temperature would you like to calculate? Enter 'C' for Celsius, 'F' for Fahrenheit:")
+	scanner.Scan()
+	tempType := scanner.Text()
+
+	var sum float64
+	var count int
+
+	// åpne fil på nytt
+	inputFile, err = os.Open("kjevik-temp-celsius-20220318-20230318.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer inputFile.Close()
+
+	reader = bufio.NewReader(inputFile)
+
+	// lese fil linje for linje
+	for {
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			if err.Error() != "EOF" { // ignore EOF error
+				log.Fatal(err)
+			}
+			break
+		}
+
+		line = strings.TrimSpace(line)
+
+		parts := strings.Split(line, ";")
+
+		temperature, err := strconv.ParseFloat(parts[len(parts)-1], 64)
+		if err != nil {
+			continue // skip over non-float lines
+		}
+
+		if tempType == "F" {
+			temperature = conv.CelsiusToFahrenheit(temperature)
+		}
+
+		// Add temperature to the sum and increment count
+		sum += temperature
+		count++
+	}
+
+	// kalkulere/skrive ut
+	average := sum / float64(count)
+	if tempType == "C" {
+		fmt.Printf("The average temperature in Celsius is %.2f\n", average)
+	} else if tempType == "F" {
+		fmt.Printf("The average temperature in Fahrenheit is %.2f\n", average)
+	} else {
+		fmt.Println("Invalid temperature type entered.")
+	}
+
 	return nil
 }
+
+/*scanner := bufio.NewScanner(os.Stdin)
+inputFile, err := os.Open("kjevik-temp-celsius-20220318-20230318.csv")
+if err != nil {
+	log.Fatal(err)
+}
+defer inputFile.Close()
+
+
+reader := csv.NewReader(inputFile)
+reader.Comma = ';'
+parts, err := reader.ReadAll()
+if err != nil {
+	log.Fatal(err)
+}//antar at dette er riktig
+*/
