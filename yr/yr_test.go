@@ -12,6 +12,7 @@ import (
 	//"errors"
 	//"io"
 	"math"
+	//"encoding/json"
 )
 
 type tempConverterTest struct {
@@ -101,7 +102,6 @@ func TestTempConverter(t *testing.T) {
 		//Ettertanker pga avg period arbeid senere:
 		//Kan være en ide å flytte denne delen av testen
 		//til test for avgPeriod? Så slipper man kodeduplisering
-		//Testen er også blitt debugget og sjekket til at alle testene faktisk blir gjennomført,
 		//da implementeringen var noe jeg "freestylet" i etterkant
 
 		reader := bufio.NewReader(inputFile)
@@ -141,6 +141,7 @@ func TestTempConverter(t *testing.T) {
 		}
 
 	}
+
 }
 
 /*type avgPeriodTest struct{
