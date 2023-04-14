@@ -27,7 +27,7 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Println("Enter 'q' or 'exit' to quit")
 	fmt.Println("Enter 'convert' to convert the file and get average temp for the file")
-	fmt.Println("Enter 'avg period' to calculate the average temperature")
+	fmt.Println("Enter 'avg period' to calculate the average temperature for the period of choice")
 	fmt.Println("Enter text:")
 	for scanner.Scan() {
 		text := scanner.Text()
