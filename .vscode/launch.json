@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch test function",
+      "type": "go",
+      "request": "launch",
+      "mode": "test",
+      "program": "/Users/issaal-musawi/minyr/yr/yr_test.go",
+      "args": [
+        "go test -v"
+      ]
+    },
+    {
+      "type": "node-terminal",
+      "name": "JavaScript Debug Terminal",
+      "request": "launch",
+      "cwd": "${/Users/issaal-musawi/minyr/yr/yr_test.go}"
+    }
+  ]
+}
